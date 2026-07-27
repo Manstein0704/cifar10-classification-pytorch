@@ -19,10 +19,10 @@ def main():
     num_epochs = 50
     n_hidden = 128
     n_output = len(classes)
-    model = CNN(n_hidden, n_output)
+    model = CNN(n_hidden, n_output).to(device)
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=lr)
     lr = 0.0001
+    optimizer = optim.Adam(model.parameters(), lr=lr)
     history = np.zeros((0, 5))
 
 
