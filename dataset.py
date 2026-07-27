@@ -22,7 +22,7 @@ def get_transforms():
     return train_transform, test_transform
 
 
-def get_dataloaders(batch_size:int, data_root:str):
+def get_dataloaders(batch_size:int = 32, data_root:str = "./data"):
     train_transform, test_transform = get_transforms()
 
     train_dataset = datasets.CIFAR10(

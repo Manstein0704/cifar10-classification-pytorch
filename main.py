@@ -6,7 +6,7 @@ def main():
         break
     print(image.shape)
     print(label.shape)
-    
+
 
 
 if __name__ == "__main__":
