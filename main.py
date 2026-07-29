@@ -1,6 +1,7 @@
 from dataset import get_dataloaders
 from trainer import train, evaluate
 from models import get_model
+from visualize import evaluate_history, plot_loss
 import torch
 import torch.optim as optim
 import torch.nn as nn
@@ -32,6 +33,11 @@ def main(args):
         print(f"epoch:{epoch} train_loss:{train_loss} train_acc:{train_acc} test_loss:{test_loss} test_acc:{test_acc}")
         item = np.array([epoch+1, train_loss, train_acc, test_loss, test_acc])
         history = np.vstack((history, item))
+
+    evaluate_history(history=history, model_name=args.model_name, save_path=f"outputs/{args.model_name}_loss.png")
+    
+
+    
 
 
 
