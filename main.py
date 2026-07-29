@@ -1,13 +1,13 @@
 from dataset import get_dataloaders
 from trainer import train, evaluate
-from models import CNN
+from models import get_model
 import torch
 import torch.optim as optim
 import torch.nn as nn
 import numpy as np
+import argparse
 
-
-def main():
+def main(args):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print(device)
 
@@ -19,7 +19,7 @@ def main():
     num_epochs = 50
     n_hidden = 128
     n_output = len(classes)
-    model = CNN(n_hidden, n_output).to(device)
+    model = get_model(args.model_name).to(device)
     criterion = nn.CrossEntropyLoss()
     lr = 0.0001
     optimizer = optim.Adam(model.parameters(), lr=lr)
@@ -35,6 +35,19 @@ def main():
 
 
 
+def parser_args():
+    parser = argparse.ArgumentParser(
+        description="Train an image classification model on CIFAR-10."
+    )
+    parser.add_argument("--model_name",
+                        type=str,
+                        default="cnn",
+                        choices=["cnn", "resnet18", "vgg16"],
+                        help= "Model architecture to use. Default:cnn")
+
+    return parser.parse_args()
+
 if __name__ == "__main__":
-    main()
+    args = parser_args()
+    main(args)
 

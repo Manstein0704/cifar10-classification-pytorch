@@ -1,5 +1,7 @@
 import torch
 import torch.nn as nn
+from torchvision import models
+
 
 class CNN(nn.Module):
     def __init__(self, n_hidden, n_output):
@@ -55,3 +57,59 @@ class CNN(nn.Module):
         return x2
 
 
+def create_resnet(n_output:int):
+    model = models.resnet18(weights=None)
+    model.conv1 = nn.Conv2d(3, 64, 3, stride=1, padding=1, bias=False)
+    model.maxpool = nn.Identity()
+    model.fc = nn.Linear(
+        model.fc.in_features,
+        n_output
+    )
+
+    return model
+
+
+def create_vgg16(n_output:int):
+    model = models.vgg16_bn(weights=None)
+    model.features[0] = nn.Conv2d(3, 64, 3, stride=1, padding=1)
+    model.classifier[6] = nn.Linear(model.classifier[6].in_features, n_output, bias=True)
+
+    return model
+
+def get_model(model_name:str, n_output:int=10, n_hidden:int=128):
+    model_name = model_name.lower()
+
+    if model_name == "cnn":
+        model = CNN(n_hidden, n_output)
+        return model
+    
+    elif model_name == "resnet18":
+        model = create_resnet(n_output)
+        return model
+
+    elif model_name == "vgg16":
+        model = create_vgg16(n_output)
+        return model
+
+    else:
+        raise ValueError(
+            f"Unsupported model:{model_name}."
+            "Choose from: cnn, resnet18, vgg16"
+        )
+
+
+
+if __name__ == "__main__":
+    import torch
+    x = torch.randn(2, 3, 32, 32)
+
+    for model_name in ["cnn", "resnet18", "vgg16"]:
+        model = get_model(model_name)
+        model.eval()
+
+        with torch.no_grad():
+            output = model(x)
+
+        print(f"{model_name}:"
+              f"input={x.shape}"
+              f"output={tuple(output.shape)}")
