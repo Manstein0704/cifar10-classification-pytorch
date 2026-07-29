@@ -34,8 +34,8 @@ def main(args):
         item = np.array([epoch+1, train_loss, train_acc, test_loss, test_acc])
         history = np.vstack((history, item))
 
-    evaluate_history(history=history, model_name=args.model_name, save_path=f"outputs/{args.model_name}_loss.png")
-    
+    evaluate_history(history=history, model_name=args.model_name, save_path=f"outputs/{args.model_name}_accuracy.png")
+
 
     
 
