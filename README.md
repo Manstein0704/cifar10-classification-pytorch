@@ -1,14 +1,18 @@
 # CIFAR-10 Image Classification with PyTorch
 
-A simple and reproducible image classification project using a custom convolutional neural network (CNN) implemented in PyTorch.
+A reproducible CIFAR-10 image classification project implemented with PyTorch.
 
-This project trains a CNN from scratch on the CIFAR-10 dataset and evaluates its classification accuracy on the test set.
+The project supports three model architectures:
+
+- a custom CNN implemented from scratch
+- ResNet-18 adapted for CIFAR-10
+- VGG-16 with Batch Normalization
+
+Users can select the model through a command-line argument.
 
 ## Overview
 
-CIFAR-10 is an image classification dataset containing 60,000 color images across 10 classes.
-
-The classes are:
+CIFAR-10 is an image classification dataset containing 60,000 color images across 10 classes:
 
 - airplane
 - automobile
@@ -32,6 +36,9 @@ where `3` represents the RGB color channels.
 ## Features
 
 - Custom CNN implemented with PyTorch
+- ResNet-18 adapted for 32 × 32 images
+- VGG-16 with Batch Normalization
+- Model selection through command-line arguments
 - Automatic CIFAR-10 download
 - Training and evaluation loops
 - GPU acceleration with CUDA
@@ -47,9 +54,9 @@ where `3` represents the RGB color channels.
 ```text
 cifar10-classification-pytorch/
 ├── dataset.py       # Dataset, preprocessing, and DataLoader creation
-├── models.py        # CNN architecture
+├── models.py        # Custom CNN and torchvision-based model definitions
 ├── trainer.py       # Training and evaluation functions
-├── main.py          # Main training script
+├── main.py          # Main training script and command-line interface
 ├── requirements.txt # Python dependencies
 ├── README.md
 ├── LICENSE
@@ -65,17 +72,15 @@ cifar10-classification-pytorch/
 - tqdm
 - Git
 
-An NVIDIA GPU is optional.
-
-The program automatically uses CUDA when a CUDA-enabled GPU is available. Otherwise, it runs on the CPU.
+An NVIDIA GPU is optional. The program automatically uses CUDA when a CUDA-enabled GPU is available and otherwise runs on the CPU.
 
 ### Recommended GPU environment
 
 The project has been developed with an NVIDIA GeForce RTX 4060.
 
-A powerful GPU is not required because CIFAR-10 images are small. GPUs with approximately 4 GB or more of VRAM should generally be sufficient with the default batch size.
+The custom CNN and ResNet-18 can generally be trained on consumer GPUs with modest VRAM. VGG-16 is significantly larger and may require more memory or a smaller batch size depending on the available GPU.
 
-CPU training is also supported, although it will be slower.
+CPU training is supported, although it will be slower.
 
 ## Installation
 
@@ -125,15 +130,13 @@ For CPU execution, run:
 pip install torch torchvision
 ```
 
-For NVIDIA GPU execution, install a CUDA-enabled version of PyTorch that matches your environment.
-
-Use the installation command provided by the official PyTorch installation selector:
+For NVIDIA GPU execution, install a CUDA-enabled version of PyTorch that matches your environment. Use the command provided by the official PyTorch installation selector:
 
 ```text
 https://pytorch.org/get-started/locally/
 ```
 
-You do not normally need to install the full CUDA Toolkit separately when using the official PyTorch wheels. However, a compatible NVIDIA driver is required.
+A compatible NVIDIA driver is required for CUDA execution.
 
 ### 4. Install the remaining dependencies
 
@@ -143,7 +146,7 @@ pip install -r requirements.txt
 
 ## Verify the GPU Environment
 
-Run the following command:
+Run:
 
 ```bash
 python -c "import torch; print('PyTorch:', torch.__version__); print('CUDA available:', torch.cuda.is_available()); print('GPU:', torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'CPU')"
@@ -157,15 +160,49 @@ CUDA available: True
 GPU: NVIDIA GeForce RTX 4060
 ```
 
-When CUDA is unavailable, the program automatically uses the CPU.
-
 ## Usage
 
-Start training with:
+### Custom CNN
+
+The custom CNN is used by default:
 
 ```bash
 python main.py
 ```
+
+It can also be selected explicitly:
+
+```bash
+python main.py --model_name cnn
+```
+
+### ResNet-18
+
+```bash
+python main.py --model_name resnet18
+```
+
+### VGG-16
+
+```bash
+python main.py --model_name vgg16
+```
+
+To display the available command-line options:
+
+```bash
+python main.py --help
+```
+
+Available models:
+
+| Argument | Architecture |
+|---|---|
+| `cnn` | Custom CNN |
+| `resnet18` | ResNet-18 adapted for CIFAR-10 |
+| `vgg16` | VGG-16 with Batch Normalization |
+
+When `--model_name` is omitted, the default model is `cnn`.
 
 On the first run, torchvision automatically downloads the CIFAR-10 dataset into:
 
@@ -175,18 +212,9 @@ On the first run, torchvision automatically downloads the CIFAR-10 dataset into:
 
 During training, the program displays the loss and accuracy for both the training and test datasets.
 
-Example:
-
-```text
-cuda:0
-Epoch [1/50] Train Loss: 1.8500 Train Acc: 31.20% | Test Loss: 1.6200 Test Acc: 40.10%
-```
-
-The exact results depend on random initialization, hardware, and training settings.
-
 ## Training Configuration
 
-The current default configuration is defined in `main.py`.
+The current default configuration is defined in `main.py` and `dataset.py`.
 
 ```python
 num_epochs = 50
@@ -195,7 +223,7 @@ learning_rate = 0.0001
 batch_size = 32
 ```
 
-To perform a quick execution test, change:
+To perform a quick execution test, temporarily change:
 
 ```python
 num_epochs = 50
@@ -206,6 +234,56 @@ to:
 ```python
 num_epochs = 1
 ```
+
+## Supported Models
+
+### Custom CNN
+
+The custom CNN contains six convolutional layers, three max-pooling layers, dropout, and a fully connected classifier.
+
+Its main structure is:
+
+```text
+Input image
+    ↓
+Convolution layers: 3 → 32 channels
+    ↓
+Max pooling and dropout
+    ↓
+Convolution layers: 32 → 64 channels
+    ↓
+Max pooling and dropout
+    ↓
+Convolution layers: 64 → 128 channels
+    ↓
+Max pooling and dropout
+    ↓
+Fully connected classifier
+    ↓
+10-class output
+```
+
+### ResNet-18
+
+The ResNet-18 implementation is based on `torchvision.models.resnet18`.
+
+Because CIFAR-10 images are only 32 × 32 pixels, the original ImageNet-style input stage is modified:
+
+- the first convolution uses a 3 × 3 kernel with stride 1
+- the initial max-pooling layer is removed
+- the final fully connected layer outputs 10 classes
+
+The model is trained from scratch with `weights=None`.
+
+### VGG-16
+
+The VGG model is based on `torchvision.models.vgg16_bn`.
+
+- the network includes Batch Normalization
+- the final classification layer is replaced with a 10-class output layer
+- the model is trained from scratch with `weights=None`
+
+VGG-16 is substantially larger than the custom CNN and ResNet-18, so it requires more memory and training time.
 
 ## Data Augmentation
 
@@ -232,34 +310,6 @@ CIFAR10_STD = (0.2470, 0.2435, 0.2616)
 
 Normalization helps stabilize neural network training by placing the input values on comparable scales.
 
-## Model Architecture
-
-The model is a custom CNN trained from scratch.
-
-Its main structure is:
-
-```text
-Input image
-    ↓
-Convolution layers: 3 → 32 channels
-    ↓
-Max pooling and dropout
-    ↓
-Convolution layers: 32 → 64 channels
-    ↓
-Max pooling and dropout
-    ↓
-Convolution layers: 64 → 128 channels
-    ↓
-Max pooling and dropout
-    ↓
-Fully connected classifier
-    ↓
-10-class output
-```
-
-No pretrained model or pretrained weights are used.
-
 ## Dataset
 
 CIFAR-10 contains:
@@ -276,7 +326,7 @@ The dataset files are stored locally and are not committed to this repository.
 
 ## Current Limitations
 
-The current version focuses on the basic training pipeline.
+The current version focuses on model selection and the basic training pipeline.
 
 The following features are planned for future development:
 
@@ -285,10 +335,10 @@ The following features are planned for future development:
 - Confusion matrix visualization
 - Class-wise accuracy
 - Misclassified image visualization
-- Configuration file support
+- Command-line options for epochs, batch size, and learning rate
 - Reproducible random seed settings
 - Automated tests
-- Comparison with ResNet models
+- Benchmarking all supported architectures
 
 ## License
 
