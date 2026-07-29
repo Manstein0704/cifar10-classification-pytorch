@@ -48,6 +48,7 @@ where `3` represents the RGB color channels.
   - Random erasing
 - CIFAR-10-specific input normalization
 - Training history recording
+- Accuracy and loss curve visualization with Matplotlib
 
 ## Project Structure
 
@@ -56,6 +57,7 @@ cifar10-classification-pytorch/
 ├── dataset.py       # Dataset, preprocessing, and DataLoader creation
 ├── models.py        # Custom CNN and torchvision-based model definitions
 ├── trainer.py       # Training and evaluation functions
+├── visualize.py     # Accuracy and loss curve visualization
 ├── main.py          # Main training script and command-line interface
 ├── requirements.txt # Python dependencies
 ├── README.md
@@ -70,6 +72,7 @@ cifar10-classification-pytorch/
 - torchvision
 - NumPy
 - tqdm
+- Matplotlib
 - Git
 
 An NVIDIA GPU is optional. The program automatically uses CUDA when a CUDA-enabled GPU is available and otherwise runs on the CPU.
@@ -210,7 +213,7 @@ On the first run, torchvision automatically downloads the CIFAR-10 dataset into:
 ./data
 ```
 
-During training, the program displays the loss and accuracy for both the training and test datasets.
+During training, the program displays the loss and accuracy for both the training and test datasets. After training, the recorded history is visualized with Matplotlib and figures can be saved in the `outputs/` directory.
 
 ## Training Configuration
 
@@ -331,7 +334,6 @@ The current version focuses on model selection and the basic training pipeline.
 The following features are planned for future development:
 
 - Saving trained model weights
-- Plotting learning curves
 - Confusion matrix visualization
 - Class-wise accuracy
 - Misclassified image visualization
