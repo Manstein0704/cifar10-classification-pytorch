@@ -10,7 +10,7 @@ def train(model, train_loader, criterion, optimizer, device):
 
     for images, labels in tqdm(train_loader):
         images = images.to(device)
-        laels = labels.to(device)
+        labels = labels.to(device)
 
         optimizer.zero_grad()
         outputs = model(images)
